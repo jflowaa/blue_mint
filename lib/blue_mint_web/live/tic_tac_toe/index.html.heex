@@ -1,0 +1,62 @@
+<div>
+  <div>
+    <button
+      class="bg-primary-500 hover:bg-primary-700 text-white m-1 p-1 rounded"
+      phx-click="show_state"
+    >
+      Show State
+    </button>
+    <.modal :if={@show_state} id="game-state-modal" show on_cancel={JS.push("show_state")}>
+      <code>
+        <%= Jason.encode!(@game_state, pretty: true) %>
+      </code>
+    </.modal>
+  </div>
+  <%= if @game_state.joinable? and Enum.all?(@game_state.users, fn x -> x != @user_id end) do %>
+    <button
+      class="bg-primary-500 hover:bg-primary-700 text-white m-1 p-1 rounded"
+      phx-click="join"
+    >
+      Join Game
+    </button>
+  <% end %>
+  <%= if Enum.any?(@game_state.users, fn x -> x == @user_id end) do %>
+    <%= if not @game_state.started? do %>
+      <button
+        class="bg-primary-500 hover:bg-primary-700 text-white m-1 p-1 rounded"
+        phx-click="start_game"
+      >
+        <%= if Enum.any?(@game_state.board, fn x -> x != "" end) do %>
+          Start New Game
+        <% else %>
+          Start Game
+        <% end %>
+      </button>
+    <% end %>
+    <button
+      class="bg-primary-500 hover:bg-primary-700 text-white m-1 p-1 rounded"
+      phx-click="leave"
+    >
+      Leave Game
+    </button>
+  <% end %>
+  <table class="table-fixed max-w-3xl">
+    <tbody>
+      <tr>
+        <%= for index <- 0..2 do %>
+          <%= render_square(index, assigns) %>
+        <% end %>
+      </tr>
+      <tr>
+        <%= for index <- 0..2 do %>
+          <%= render_square(index + 3, assigns) %>
+        <% end %>
+      </tr>
+      <tr>
+        <%= for index <- 0..2 do %>
+          <%= render_square(index + 6, assigns) %>
+        <% end %>
+      </tr>
+    </tbody>
+  </table>
+</div>

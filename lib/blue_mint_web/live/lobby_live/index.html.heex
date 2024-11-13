@@ -1,0 +1,19 @@
+<div class="flex flex-col gap-4 h-[calc(100vh-100px)]">
+  <div class="flex-none">
+    <.header>
+      <span class="text-sm">lobby: </span><%= @lobby.name %>
+      <:subtitle>Connected Users: <%= Enum.count(@lobby.connected_users) %></:subtitle>
+    </.header>
+  </div>
+
+  <div class="flex-none">
+    <%= live_render(@socket, BlueMintWeb.Live.TicTacToe.Index,
+      id: "tic-tac-toe",
+      session: %{"lobby_id" => @lobby.id, "user_id" => @user_id}
+    ) %>
+  </div>
+
+  <div class="flex-grow overflow-y-scroll" id="messages-container">
+    <BlueMintWeb.Components.LobbyMessagesComponent.render messages={@streams.messages} />
+  </div>
+</div>
