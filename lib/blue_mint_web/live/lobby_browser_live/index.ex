@@ -2,11 +2,20 @@ defmodule BlueMintWeb.LobbyBrowserLive.Index do
   use BlueMintWeb, :live_view
 
   @impl true
-  def mount(_params, session, socket) do
+  def mount(params, session, socket) do
     Registry.register(BlueMint.EventRegistry.LobbyUpdate, :lobby_update, %{})
 
+    new_socket =
+      case Map.get(params, "reason", nil) do
+        "lobby_closed" ->
+          put_flash(socket, :error, "Redirecting to lobby browser because the lobby was closed")
+
+        _ ->
+          socket
+      end
+
     {:ok,
-     socket
+     new_socket
      |> assign(:user_id, session["user_id"])
      |> stream(:lobbies, BlueMint.Lobby.Client.list_lobbies())}
   end

@@ -7,17 +7,13 @@ defmodule BlueMintWeb.Live.TicTacToe.Index do
       {:ok, _} ->
         case BlueMint.TicTacToe.Client.get(session["lobby_id"]) do
           {:ok, game_state} ->
-            Phoenix.PubSub.subscribe(
-              BlueMint.PubSub,
-              BlueMint.game_state_topic(session["lobby_id"])
-            )
+            BlueMint.subscribe_to_game_state(session["lobby_id"])
 
             {:ok,
              socket
              |> assign(:lobby_id, session["lobby_id"])
              |> assign(:user_id, session["user_id"])
-             |> assign(:game_state, game_state)
-             |> assign(:show_state, false)}
+             |> assign(:game_state, game_state)}
 
           _ ->
             {:error, "Failed to retrieve game state"}
@@ -40,41 +36,22 @@ defmodule BlueMintWeb.Live.TicTacToe.Index do
   end
 
   @impl true
-  def handle_event("show_state", _, socket) do
-    {:noreply, assign(socket, :show_state, not socket.assigns.show_state)}
-  end
-
-  @impl true
   def handle_event("join", _, socket) do
     case BlueMint.TicTacToe.Client.join(socket.assigns.lobby_id, socket.assigns.user_id) do
       :ok ->
-        Phoenix.PubSub.broadcast(
-          BlueMint.PubSub,
-          BlueMint.game_state_topic(socket.assigns.lobby_id),
-          :update
-        )
-
+        BlueMint.broadcast_game_state(socket.assigns.lobby_id)
         username = BlueMint.Common.NameManager.lookup_username(socket.assigns.user_id)
 
-        Phoenix.PubSub.broadcast(
-          BlueMint.PubSub,
-          BlueMint.lobby_messages_topic(socket.assigns.lobby_id),
-          {:message, "Player '#{username}' joined the game"}
+        BlueMint.broadcast_lobby_message(
+          socket.assigns.lobby_id,
+          "Player '#{username}' joined the game"
         )
 
       :not_joinable ->
-        Phoenix.PubSub.broadcast(
-          BlueMint.PubSub,
-          BlueMint.user_messages_topic(socket.assigns.user_id),
-          {:message, "Game not joinable"}
-        )
+        BlueMint.broadcast_user_message(socket.assigns.user_id, "Game not joinable")
 
       :already_joined ->
-        Phoenix.PubSub.broadcast(
-          BlueMint.PubSub,
-          BlueMint.user_messages_topic(socket.assigns.user_id),
-          {:message, "Already joined"}
-        )
+        BlueMint.broadcast_user_message(socket.assigns.user_id, "Already joined")
     end
 
     {:noreply, socket}
@@ -84,26 +61,16 @@ defmodule BlueMintWeb.Live.TicTacToe.Index do
   def handle_event("leave", _, socket) do
     case BlueMint.TicTacToe.Client.leave(socket.assigns.lobby_id, socket.assigns.user_id) do
       :ok ->
-        Phoenix.PubSub.broadcast(
-          BlueMint.PubSub,
-          BlueMint.game_state_topic(socket.assigns.lobby_id),
-          :update
-        )
-
+        BlueMint.broadcast_game_state(socket.assigns.lobby_id)
         username = BlueMint.Common.NameManager.lookup_username(socket.assigns.user_id)
 
-        Phoenix.PubSub.broadcast(
-          BlueMint.PubSub,
-          BlueMint.lobby_messages_topic(socket.assigns.lobby_id),
-          {:message, "Player '#{username}' left the game"}
+        BlueMint.broadcast_lobby_message(
+          socket.assigns.lobby_id,
+          "Player '#{username}' left the game"
         )
 
       :not_in_game ->
-        Phoenix.PubSub.broadcast(
-          BlueMint.PubSub,
-          BlueMint.user_messages_topic(socket.assigns.user_id),
-          {:message, "Not in game"}
-        )
+        BlueMint.broadcast_user_message(socket.assigns.user_id, "Not in game")
     end
 
     {:noreply, socket}
@@ -113,28 +80,18 @@ defmodule BlueMintWeb.Live.TicTacToe.Index do
   def handle_event("start_game", _, socket) do
     case BlueMint.TicTacToe.Client.start_game(socket.assigns.lobby_id) do
       {:ok, user_id} ->
-        Phoenix.PubSub.broadcast(
-          BlueMint.PubSub,
-          BlueMint.game_state_topic(socket.assigns.lobby_id),
-          :update
-        )
-
+        BlueMint.broadcast_game_state(socket.assigns.lobby_id)
         username = BlueMint.Common.NameManager.lookup_username(user_id)
 
-        Phoenix.PubSub.broadcast(
-          BlueMint.PubSub,
-          BlueMint.lobby_messages_topic(socket.assigns.lobby_id),
-          {:message, "Player '#{username}' has the first move"}
+        BlueMint.broadcast_lobby_message(
+          socket.assigns.lobby_id,
+          "Player '#{username}' has the first move"
         )
 
         {:noreply, socket}
 
       {:cannot_start, reason} ->
-        Phoenix.PubSub.broadcast(
-          BlueMint.PubSub,
-          BlueMint.user_messages_topic(socket.assigns.user_id),
-          {:message, reason}
-        )
+        BlueMint.broadcast_user_message(socket.assigns.user_id, reason)
 
         {:noreply, socket}
     end
@@ -148,74 +105,33 @@ defmodule BlueMintWeb.Live.TicTacToe.Index do
            String.to_integer(position)
          ) do
       {:not_in_game, _} ->
-        Phoenix.PubSub.broadcast(
-          BlueMint.PubSub,
-          BlueMint.user_messages_topic(socket.assigns.user_id),
-          {:message, "Not in game"}
-        )
+        BlueMint.broadcast_user_message(socket.assigns.user_id, "Not in game")
 
       {:not_started, _} ->
-        Phoenix.PubSub.broadcast(
-          BlueMint.PubSub,
-          BlueMint.user_messages_topic(socket.assigns.user_id),
-          {:message, "Game not started yet"}
-        )
+        BlueMint.broadcast_user_message(socket.assigns.user_id, "Game not started yet")
 
       {:invalid_move, _} ->
-        Phoenix.PubSub.broadcast(
-          BlueMint.PubSub,
-          BlueMint.user_messages_topic(socket.assigns.user_id),
-          {:message, "Invalid move"}
-        )
+        BlueMint.broadcast_user_message(socket.assigns.lobby_id, "Invalid move")
 
       {:not_your_turn, _} ->
-        Phoenix.PubSub.broadcast(
-          BlueMint.PubSub,
-          BlueMint.user_messages_topic(socket.assigns.user_id),
-          {:message, "Not your turn"}
-        )
+        BlueMint.broadcast_user_message(socket.assigns.user_id, "Not your turn")
 
       {:winner, _} ->
-        Phoenix.PubSub.broadcast(
-          BlueMint.PubSub,
-          BlueMint.game_state_topic(socket.assigns.lobby_id),
-          :update
-        )
-
+        BlueMint.broadcast_game_state(socket.assigns.lobby_id)
         username = BlueMint.Common.NameManager.lookup_username(socket.assigns.user_id)
-
-        Phoenix.PubSub.broadcast(
-          BlueMint.PubSub,
-          BlueMint.lobby_messages_topic(socket.assigns.lobby_id),
-          {:message, "Player '#{username}' won!"}
-        )
+        BlueMint.broadcast_lobby_message(socket.assigns.lobby_id, "Player '#{username}' won!")
 
       {:tie, _} ->
-        Phoenix.PubSub.broadcast(
-          BlueMint.PubSub,
-          BlueMint.game_state_topic(socket.assigns.lobby_id),
-          :update
-        )
-
-        Phoenix.PubSub.broadcast(
-          BlueMint.PubSub,
-          BlueMint.lobby_messages_topic(socket.assigns.lobby_id),
-          {:message, "Game ended in a tie!"}
-        )
+        BlueMint.broadcast_game_state(socket.assigns.lobby_id)
+        BlueMint.broadcast_lobby_message(socket.assigns.lobby_id, "Game ended in a tie!")
 
       {:ok, user_id} ->
-        Phoenix.PubSub.broadcast(
-          BlueMint.PubSub,
-          BlueMint.game_state_topic(socket.assigns.lobby_id),
-          :update
-        )
-
+        BlueMint.broadcast_game_state(socket.assigns.lobby_id)
         username = BlueMint.Common.NameManager.lookup_username(user_id)
 
-        Phoenix.PubSub.broadcast(
-          BlueMint.PubSub,
-          BlueMint.lobby_messages_topic(socket.assigns.lobby_id),
-          {:message, "Player '#{username}' turn to move"}
+        BlueMint.broadcast_lobby_message(
+          socket.assigns.lobby_id,
+          "Player '#{username}' turn to move"
         )
     end
 

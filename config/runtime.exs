@@ -33,8 +33,8 @@ if config_env() == :prod do
       You can generate one by calling: mix phx.gen.secret
       """
 
-  host = System.get_env("PHX_HOST") || "example.com"
-  port = String.to_integer(System.get_env("PORT") || "4000")
+  host = System.get_env("PHX_HOST") || "blue-mint.jack-develops.com"
+  port = String.to_integer(System.get_env("PORT") || "4001")
 
   config :blue_mint, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 

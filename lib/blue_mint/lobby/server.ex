@@ -24,6 +24,11 @@ defmodule BlueMint.Lobby.Server do
     {:reply, {:ok, lobby}, [lobby | state]}
   end
 
+  def handle_call({:close_lobby, lobby_id}, _from, state) do
+    new_state = Enum.reject(state, fn lobby -> lobby.id == lobby_id end)
+    {:reply, :ok, new_state}
+  end
+
   def handle_call({:get_lobby, lobby_id}, _from, state) do
     case Enum.find(state, &(&1.id == lobby_id)) do
       nil ->

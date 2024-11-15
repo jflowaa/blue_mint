@@ -1,26 +1,12 @@
 <header class="px-4 sm:px-6 lg:px-8">
   <div class="flex items-center justify-between border-b border-zinc-100 py-3 text-sm">
     <div class="flex items-center gap-4">
-      <a href="/">
-        <img src={~p"/images/logo.svg"} width="36" />
-      </a>
-      <p class="bg-brand/5 text-brand rounded-full px-2 font-medium leading-6">
+      <a href="/" class="bg-brand/5 text-brand rounded-full px-2 font-medium leading-6">
         <%= Application.get_env(:blue_mint, :product_name) %>
-      </p>
+      </a>
     </div>
     <div class="flex items-center gap-4 font-semibold leading-6 text-zinc-900">
-      <.live_component
-        module={BlueMintWeb.Live.Components.UsernameComponent}
-        id="username-widget"
-        user_id={@user_id}
-      >
-      </.live_component>
-      <a
-        href="https://github.com/jflowaa/blue_mint"
-        class="rounded-lg bg-primary-100 px-2 py-1 text-xs hover:bg-secondary-200/80"
-      >
-        Source Code <span aria-hidden="true">&rarr;</span>
-      </a>
+      <BlueMintWeb.Components.NavbarMenuComponent.render user_id={@user_id} />
     </div>
   </div>
 </header>

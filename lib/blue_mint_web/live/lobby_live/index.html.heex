@@ -3,6 +3,11 @@
     <.header>
       <span class="text-sm">lobby: </span><%= @lobby.name %>
       <:subtitle>Connected Users: <%= Enum.count(@lobby.connected_users) %></:subtitle>
+      <:actions>
+        <%= if @lobby.owner_id == @user_id do %>
+          <.button phx-click="close_lobby">Close Lobby</.button>
+        <% end %>
+      </:actions>
     </.header>
   </div>
 

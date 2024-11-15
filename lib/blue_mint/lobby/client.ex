@@ -5,6 +5,8 @@ defmodule BlueMint.Lobby.Client do
   def create_lobby(lobby),
     do: GenServer.call(:lobby_server, {:create_lobby, lobby})
 
+  def close_lobby(lobby_id), do: GenServer.call(:lobby_server, {:close_lobby, lobby_id})
+
   def get_lobby(lobby_id),
     do: GenServer.call(:lobby_server, {:get_lobby, lobby_id})
 

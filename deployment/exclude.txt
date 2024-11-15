@@ -1,0 +1,9 @@
+.git/
+.github/
+.elixir_ls/
+.dockerignore
+.gitignore
+_build
+deps/
+dbs/
+test/

@@ -1,31 +1,35 @@
-<.header>
-  Listing Lobbies
-  <:actions>
-    <.link patch={~p"/new"}>
-      <.button>Create</.button>
-    </.link>
-  </:actions>
-</.header>
+<div class="h-[calc(100vh-100px)]">
+  <.header>
+    Listing Lobbies
+    <:actions>
+      <.link patch={~p"/new"}>
+        <.button>Create</.button>
+      </.link>
+    </:actions>
+  </.header>
 
-<.table id="lobbies" rows={@streams.lobbies}>
-  <:col :let={{_id, lobby}} label="Name"><%= lobby.name %></:col>
-  <:col :let={{_id, lobby}} label="Game Type"><%= BlueMint.pretty_atom(lobby.game_type) %></:col>
-  <:col :let={{_id, lobby}} label="Players Connected">
-    <%= Enum.count(lobby.connected_users) %>
-  </:col>
-  <:action :let={{_id, lobby}}>
-    <.link navigate={~p"/lobby/#{lobby.id}"}>Join Lobby</.link>
-  </:action>
-</.table>
+  <.table id="lobbies" rows={@streams.lobbies}>
+    <:col :let={{_id, lobby}} label="Name"><%= lobby.name %></:col>
+    <:col :let={{_id, lobby}} label="Game Type">
+      <%= BlueMint.pretty_atom(lobby.game_type) %>
+    </:col>
+    <:col :let={{_id, lobby}} label="Players Connected">
+      <%= Enum.count(lobby.connected_users) %>
+    </:col>
+    <:action :let={{_id, lobby}}>
+      <.link navigate={~p"/lobby/#{lobby.id}"}>Join Lobby</.link>
+    </:action>
+  </.table>
 
-<.modal :if={@live_action in [:new]} id="lobby-modal" show on_cancel={JS.patch(~p"/")}>
-  <.live_component
-    module={BlueMintWeb.LobbyBrowserLive.FormComponent}
-    id={@lobby.id || :new}
-    user_id={@user_id}
-    title={@page_title}
-    action={@live_action}
-    lobby={@lobby}
-    patch={~p"/"}
-  />
-</.modal>
+  <.modal :if={@live_action in [:new]} id="lobby-modal" show on_cancel={JS.patch(~p"/")}>
+    <.live_component
+      module={BlueMintWeb.LobbyBrowserLive.FormComponent}
+      id={@lobby.id || :new}
+      user_id={@user_id}
+      title={@page_title}
+      action={@live_action}
+      lobby={@lobby}
+      patch={~p"/"}
+    />
+  </.modal>
+</div>

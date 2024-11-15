@@ -1,44 +1,25 @@
 <div>
   <div>
-    <button
-      class="bg-primary-500 hover:bg-primary-700 text-white m-1 p-1 rounded"
-      phx-click="show_state"
-    >
-      Show State
-    </button>
-    <.modal :if={@show_state} id="game-state-modal" show on_cancel={JS.push("show_state")}>
-      <code>
-        <%= Jason.encode!(@game_state, pretty: true) %>
-      </code>
-    </.modal>
+    <BlueMintWeb.Components.GameStateViewerComponent.render game_state={@game_state} />
   </div>
   <%= if @game_state.joinable? and Enum.all?(@game_state.users, fn x -> x != @user_id end) do %>
-    <button
-      class="bg-primary-500 hover:bg-primary-700 text-white m-1 p-1 rounded"
-      phx-click="join"
-    >
+    <.button phx-click="join">
       Join Game
-    </button>
+    </.button>
   <% end %>
   <%= if Enum.any?(@game_state.users, fn x -> x == @user_id end) do %>
     <%= if not @game_state.started? do %>
-      <button
-        class="bg-primary-500 hover:bg-primary-700 text-white m-1 p-1 rounded"
-        phx-click="start_game"
-      >
+      <.button phx-click="start_game">
         <%= if Enum.any?(@game_state.board, fn x -> x != "" end) do %>
           Start New Game
         <% else %>
           Start Game
         <% end %>
-      </button>
+      </.button>
     <% end %>
-    <button
-      class="bg-primary-500 hover:bg-primary-700 text-white m-1 p-1 rounded"
-      phx-click="leave"
-    >
+    <.button phx-click="leave">
       Leave Game
-    </button>
+    </.button>
   <% end %>
   <table class="table-fixed max-w-3xl">
     <tbody>

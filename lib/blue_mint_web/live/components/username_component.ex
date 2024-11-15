@@ -4,30 +4,37 @@ defmodule BlueMintWeb.Live.Components.UsernameComponent do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="text-sm flex flex-row items-center">
-      <%= if assigns[:username] == nil do %>
-        <span>No username</span>
-      <% else %>
-        <span>
-          <%= @username %> &nbsp;
-        </span>
-      <% end %>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke-width="1.5"
-        stroke="currentColor"
-        class="size-3 cursor-pointer"
-        phx-click="change"
-        phx-target={@myself}
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
-        />
-      </svg>
+    <div class="flex flex-col">
+      <div class="flex items-center">
+        <p class="text-xs mr-1">
+          Username
+        </p>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="size-3 cursor-pointer"
+          phx-click="change"
+          phx-target={@myself}
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
+          />
+        </svg>
+      </div>
+      <div>
+        <p>
+          <%= if assigns[:username] == nil do %>
+            No username
+          <% else %>
+            <%= @username %>
+          <% end %>
+        </p>
+      </div>
     </div>
     """
   end
@@ -47,10 +54,10 @@ defmodule BlueMintWeb.Live.Components.UsernameComponent do
         case BlueMint.Common.NameManager.set_username(socket.assigns.user_id, username) do
           :ok ->
             if socket.assigns.username != nil do
-              Phoenix.PubSub.broadcast(
-                BlueMint.PubSub,
-                BlueMint.username_change_topic(socket.assigns.user_id),
-                {:username_change, socket.assigns.username, username}
+              BlueMint.broadcast_username_change(
+                socket.assigns.user_id,
+                socket.assigns.username,
+                username
               )
             end
 
