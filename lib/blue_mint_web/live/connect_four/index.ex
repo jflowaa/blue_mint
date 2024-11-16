@@ -1,11 +1,11 @@
-defmodule BlueMintWeb.Live.TicTacToe.Index do
+defmodule BlueMintWeb.Live.ConnectFour.Index do
   use BlueMintWeb, :live_view
 
   @impl true
   def mount(_params, session, socket) do
-    case BlueMint.Game.ServerSupervisor.create(session["lobby_id"], BlueMint.TicTacToe.Server) do
+    case BlueMint.Game.ServerSupervisor.create(session["lobby_id"], BlueMint.ConnectFour.Server) do
       {:ok, _} ->
-        case BlueMint.TicTacToe.Client.get(session["lobby_id"]) do
+        case BlueMint.ConnectFour.Client.get(session["lobby_id"]) do
           {:ok, game_state} ->
             BlueMint.subscribe_to_game_state(session["lobby_id"])
 
@@ -26,7 +26,7 @@ defmodule BlueMintWeb.Live.TicTacToe.Index do
 
   @impl true
   def handle_info(:update, socket) do
-    case BlueMint.TicTacToe.Client.get(socket.assigns.lobby_id) do
+    case BlueMint.ConnectFour.Client.get(socket.assigns.lobby_id) do
       {:ok, game_state} ->
         {:noreply, assign(socket, :game_state, game_state)}
 
@@ -37,7 +37,7 @@ defmodule BlueMintWeb.Live.TicTacToe.Index do
 
   @impl true
   def handle_event("join", _, socket) do
-    case BlueMint.TicTacToe.Client.join(socket.assigns.lobby_id, socket.assigns.user_id) do
+    case BlueMint.ConnectFour.Client.join(socket.assigns.lobby_id, socket.assigns.user_id) do
       :ok ->
         BlueMint.broadcast_game_state(socket.assigns.lobby_id)
         username = BlueMint.Common.NameManager.lookup_username(socket.assigns.user_id)
@@ -59,7 +59,7 @@ defmodule BlueMintWeb.Live.TicTacToe.Index do
 
   @impl true
   def handle_event("leave", _, socket) do
-    case BlueMint.TicTacToe.Client.leave(socket.assigns.lobby_id, socket.assigns.user_id) do
+    case BlueMint.ConnectFour.Client.leave(socket.assigns.lobby_id, socket.assigns.user_id) do
       :ok ->
         BlueMint.broadcast_game_state(socket.assigns.lobby_id)
         username = BlueMint.Common.NameManager.lookup_username(socket.assigns.user_id)
@@ -78,7 +78,7 @@ defmodule BlueMintWeb.Live.TicTacToe.Index do
 
   @impl true
   def handle_event("start_game", _, socket) do
-    case BlueMint.TicTacToe.Client.start_game(socket.assigns.lobby_id) do
+    case BlueMint.ConnectFour.Client.start_game(socket.assigns.lobby_id) do
       {:ok, user_id} ->
         BlueMint.broadcast_game_state(socket.assigns.lobby_id)
         username = BlueMint.Common.NameManager.lookup_username(user_id)
@@ -98,11 +98,11 @@ defmodule BlueMintWeb.Live.TicTacToe.Index do
   end
 
   @impl true
-  def handle_event("move", %{"position" => position}, socket) do
-    case BlueMint.TicTacToe.Client.move(
+  def handle_event("move", %{"column" => column}, socket) do
+    case BlueMint.ConnectFour.Client.move(
            socket.assigns.lobby_id,
            socket.assigns.user_id,
-           String.to_integer(position)
+           String.to_integer(column)
          ) do
       {:not_in_game, _} ->
         BlueMint.broadcast_user_message(socket.assigns.user_id, "Not in game")
@@ -138,46 +138,20 @@ defmodule BlueMintWeb.Live.TicTacToe.Index do
     {:noreply, socket}
   end
 
-  defp render_square(position, assigns) do
-    assigns =
-      assigns
-      |> assign(
-        :available_cell_class,
-        if(
-          assigns.game_state.user_turn == assigns.user_id and
-            Enum.at(assigns.game_state.board, position) == "",
-          do: "cursor-pointer border-green-900"
-        )
-      )
-      |> assign(:position, position)
+  defp determine_cell_color(game_state, row, column) do
+    case game_state.winning_combination do
+      nil ->
+        "blue"
 
-    ~H"""
-    <td
-      class={"border-8 #{@available_cell_class}"}
-      phx-click="move"
-      phx-value-position={"#{@position}"}
-    >
-      <svg width="100%" height="100%" preserveAspectRatio="none">
-        <%= case Enum.at(@game_state.board, @position) do %>
-          <% "x" -> %>
-            <%= draw_svg_cross() %>
-          <% "o" -> %>
-            <%= draw_svg_circle() %>
-          <% _ -> %>
-        <% end %>
-      </svg>
-    </td>
-    """
+      [] ->
+        "blue"
+
+      winning_combination ->
+        if Enum.member?(winning_combination, {row, column}) do
+          "green"
+        else
+          "blue"
+        end
+    end
   end
-
-  defp draw_svg_cross(assigns \\ %{}),
-    do: ~H"""
-    <line x1="25%" y1="25%" x2="75%" y2="75%" stroke="black" stroke-width="8" />
-    <line x1="75%" y1="25%" x2="25%" y2="75%" stroke="black" stroke-width="8" />
-    """
-
-  defp draw_svg_circle(assigns \\ %{}),
-    do: ~H"""
-    <circle cx="50%" cy="50%" r="25%" stroke="black" stroke-width="8" fill="white" fill-opacity="0.0" />
-    """
 end

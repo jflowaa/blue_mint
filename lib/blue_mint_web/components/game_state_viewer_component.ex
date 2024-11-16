@@ -14,9 +14,15 @@ defmodule BlueMintWeb.Components.GameStateViewerComponent do
         <.header>
           Game State
         </.header>
-        <code class="whitespace-pre-wrap"><%= Jason.encode!(@game_state, pretty: true) %></code>
+        <code class="whitespace-pre-wrap"><%= render_game_state(@game_state) %></code>
       </.modal>
     </div>
     """
+  end
+
+  defp render_game_state(game_state) do
+    game_state
+    |> Map.drop([:id, :lobby_id, :users, :user_turn, :__struct__, :__meta__, :__changeset__])
+    |> inspect(pretty: true)
   end
 end

@@ -22,10 +22,10 @@ defmodule BlueMint.Game.ServerSupervisor do
     Supervisor.init(children, strategy: :one_for_one)
   end
 
-  def create(lobby_id, game_type) do
+  def create(lobby_id, server_type) do
     case DynamicSupervisor.start_child(
            BlueMint.Game.ServerSupervisor,
-           {determine_server_module(game_type), lobby_id: lobby_id}
+           {server_type, lobby_id: lobby_id}
          ) do
       {:ok, pid} ->
         {:ok, pid}
@@ -35,16 +35,6 @@ defmodule BlueMint.Game.ServerSupervisor do
 
       {:error, reason} ->
         {:error, reason}
-    end
-  end
-
-  defp determine_server_module(game_type) do
-    case game_type do
-      :tic_tac_toe ->
-        BlueMint.TicTacToe.Server
-
-      _ ->
-        nil
     end
   end
 

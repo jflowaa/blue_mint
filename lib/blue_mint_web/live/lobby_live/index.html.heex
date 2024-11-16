@@ -12,10 +12,20 @@
   </div>
 
   <div class="flex-none">
-    <%= live_render(@socket, BlueMintWeb.Live.TicTacToe.Index,
-      id: "tic-tac-toe",
-      session: %{"lobby_id" => @lobby.id, "user_id" => @user_id}
-    ) %>
+    <%= case @lobby.game_type do %>
+      <% :tic_tac_toe -> %>
+        <%= live_render(@socket, BlueMintWeb.Live.TicTacToe.Index,
+          id: "tic-tac-toe",
+          session: %{"lobby_id" => @lobby.id, "user_id" => @user_id}
+        ) %>
+      <% :connect_four -> %>
+        <%= live_render(@socket, BlueMintWeb.Live.ConnectFour.Index,
+          id: "connect-four",
+          session: %{"lobby_id" => @lobby.id, "user_id" => @user_id}
+        ) %>
+      <% _ -> %>
+        <span>Game type not found</span>
+    <% end %>
   </div>
 
   <div class="flex-grow overflow-y-scroll" id="messages-container">
