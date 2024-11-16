@@ -1,6 +1,5 @@
 defmodule BlueMint.TicTacToe.GameState do
   use Ecto.Schema
-  import Ecto.Changeset
 
   @primary_key {:id, :string, autogenerate: false}
 
@@ -12,12 +11,6 @@ defmodule BlueMint.TicTacToe.GameState do
     field(:board, {:array, :string}, default: ["", "", "", "", "", "", "", "", ""])
     field(:user_turn, :string)
     field(:users, {:array, :string}, default: [])
-  end
-
-  def changeset(%BlueMint.TicTacToe.GameState{} = game_state, attrs) do
-    game_state
-    |> cast(attrs, [:board, :user_turn])
-    |> validate_required([:board, :user_turn])
   end
 
   def add_user(state, user_id) do
@@ -55,6 +48,29 @@ defmodule BlueMint.TicTacToe.GameState do
 
       false ->
         {:not_in_game, state}
+    end
+  end
+
+  def start_game(state) do
+    cond do
+      state.started? ->
+        {{:cannot_start, "Already started"}, state}
+
+      state.joinable? ->
+        {{:cannot_start, "Still open for users to join joinable"}, state}
+
+      Enum.count(state.users) == 2 ->
+        new_state =
+          state
+          |> Map.put(:started?, true)
+          |> Map.put(:joinable?, false)
+          |> Map.put(:user_turn, Enum.shuffle(state.users) |> hd)
+          |> Map.put(:board, ["", "", "", "", "", "", "", "", ""])
+
+        {{:ok, new_state.user_turn}, new_state}
+
+      true ->
+        {{:cannot_start, "Cannot start"}, state}
     end
   end
 

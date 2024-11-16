@@ -36,26 +36,8 @@ defmodule BlueMint.TicTacToe.Server do
   end
 
   def handle_call(:start_game, _from, state) do
-    cond do
-      state.started? ->
-        {:reply, {:cannot_start, "Already started"}, state}
-
-      state.joinable? ->
-        {:reply, {:cannot_start, "Still open for users to join joinable"}, state}
-
-      Enum.count(state.users) == 2 ->
-        new_state =
-          state
-          |> Map.put(:started?, true)
-          |> Map.put(:joinable?, false)
-          |> Map.put(:user_turn, Enum.shuffle(state.users) |> hd)
-          |> Map.put(:board, ["", "", "", "", "", "", "", "", ""])
-
-        {:reply, {:ok, new_state.user_turn}, new_state}
-
-      true ->
-        {:reply, {:cannot_start, "Cannot start"}, state}
-    end
+    {result, new_state} = BlueMint.TicTacToe.GameState.start_game(state)
+    {:reply, result, new_state}
   end
 
   def handle_call({:move, user_id, position}, _from, state) do
