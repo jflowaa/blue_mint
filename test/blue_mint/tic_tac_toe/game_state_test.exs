@@ -1,5 +1,5 @@
 defmodule BlueMint.TicTacToe.GameStateTest do
-  use BlueMintWeb.ConnCase, async: true
+  use ExUnit.Case, async: true
   alias BlueMint.TicTacToe.GameState
 
   setup do

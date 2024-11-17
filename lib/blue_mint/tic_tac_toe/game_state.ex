@@ -3,7 +3,6 @@ defmodule BlueMint.TicTacToe.GameState do
 
   @primary_key {:id, :string, autogenerate: false}
 
-  @derive {Jason.Encoder, only: [:lobby_id, :started?, :joinable?, :board, :user_turn, :users]}
   schema "game_state" do
     field(:lobby_id, :string)
     field(:started?, :boolean, default: false)

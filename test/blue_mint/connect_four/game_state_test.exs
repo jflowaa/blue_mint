@@ -1,5 +1,5 @@
 defmodule BlueMint.ConnectFour.GameStateTest do
-  use BlueMintWeb.ConnCase, async: true
+  use ExUnit.Case, async: true
   alias BlueMint.ConnectFour.GameState
 
   setup do

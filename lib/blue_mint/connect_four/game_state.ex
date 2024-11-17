@@ -5,8 +5,8 @@ defmodule BlueMint.ConnectFour.GameState do
   @columns 6
   @primary_key {:id, :string, autogenerate: false}
 
-  @derive {Jason.Encoder, only: [:lobby_id, :started?, :joinable?, :board, :user_turn, :users]}
   schema "game_state" do
+    field(:game_state_id, :string)
     field(:lobby_id, :string)
     field(:started?, :boolean, default: false)
     field(:joinable?, :boolean, default: true)

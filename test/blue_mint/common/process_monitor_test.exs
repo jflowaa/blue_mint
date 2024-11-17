@@ -1,5 +1,5 @@
 defmodule BlueMint.Common.ProcessMonitorTest do
-  use BlueMintWeb.ConnCase, async: true
+  use ExUnit.Case, async: true
   alias BlueMint.Common.ProcessMonitor
 
   defmodule MockViewModule do

@@ -40,3 +40,4 @@ npm-debug.log
 /priv/static/**/*.gz
 
 .DS_Store
+.elixir_ls/
