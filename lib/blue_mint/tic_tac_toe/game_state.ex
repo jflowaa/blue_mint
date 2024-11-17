@@ -57,7 +57,7 @@ defmodule BlueMint.TicTacToe.GameState do
         {{:cannot_start, "Already started"}, state}
 
       state.joinable? ->
-        {{:cannot_start, "Still open for users to join joinable"}, state}
+        {{:cannot_start, "Still open for users to join"}, state}
 
       Enum.count(state.users) == 2 ->
         new_state =

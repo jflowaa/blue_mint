@@ -1,5 +1,5 @@
 defmodule BlueMint.TicTacToe.GameStateTest do
-  use ExUnit.Case
+  use BlueMintWeb.ConnCase, async: true
   alias BlueMint.TicTacToe.GameState
 
   setup do
@@ -59,8 +59,7 @@ defmodule BlueMint.TicTacToe.GameStateTest do
   test "start_game/1 returns :cannot_start if the game is still joinable", %{initial_state: state} do
     state = Map.put(state, :joinable?, true)
 
-    {{:cannot_start, "Still open for users to join joinable"}, _state} =
-      GameState.start_game(state)
+    {{:cannot_start, "Still open for users to join"}, _state} = GameState.start_game(state)
   end
 
   test "start_game/1 starts the game if there are exactly two users", %{initial_state: state} do
@@ -77,7 +76,7 @@ defmodule BlueMint.TicTacToe.GameStateTest do
     initial_state: state
   } do
     state = Map.put(state, :users, ["user1"])
-    {{:cannot_start, "Cannot start"}, _state} = GameState.start_game(state)
+    {{:cannot_start, "Still open for users to join"}, _state} = GameState.start_game(state)
   end
 
   test "move/3 returns :not_started if the game is not started", %{initial_state: state} do

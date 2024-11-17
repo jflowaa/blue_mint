@@ -64,7 +64,7 @@ defmodule BlueMint.ConnectFour.GameState do
         {{:cannot_start, "Already started"}, state}
 
       state.joinable? ->
-        {{:cannot_start, "Still open for users to join joinable"}, state}
+        {{:cannot_start, "Still open for users to join"}, state}
 
       Enum.count(state.users) == 2 ->
         new_state =
@@ -95,7 +95,7 @@ defmodule BlueMint.ConnectFour.GameState do
       state.user_turn != user_id ->
         {:not_your_turn, state}
 
-      row == 7 ->
+      row >= 6 ->
         {:invalid_move, state}
 
       column < 0 or column > @columns ->
