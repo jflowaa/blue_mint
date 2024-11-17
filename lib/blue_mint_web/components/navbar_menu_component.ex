@@ -34,7 +34,7 @@ defmodule BlueMintWeb.Components.NavbarMenuComponent do
             </div>
             <div class="py-1" phx-click={JS.hide(to: "#dropdown-menu")}>
               <a
-                href="https://github.com/jflowaa/blue_mint/tree/rework"
+                href="https://github.com/jflowaa/blue_mint"
                 target="_blank"
                 class="text-gray-700 flex justify-between w-full px-4 py-2 text-sm leading-5 text-left"
                 role="menuitem"
