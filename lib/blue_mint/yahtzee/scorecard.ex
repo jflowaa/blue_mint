@@ -76,6 +76,11 @@ defmodule BlueMint.Yahtzee.Scorecard do
     |> Map.put(:grand_total, get_grand_total(scorecard))
   end
 
+  def is_complete?(scorecard) do
+    Enum.all?(@upper_section, fn x -> Map.get(scorecard, x, nil) != nil end) and
+      Enum.all?(@lower_section, fn x -> Map.get(scorecard, x, nil) != nil end)
+  end
+
   defp determine_score(roll, category) do
     case category do
       :ones -> count_dice(roll, 1) * 1

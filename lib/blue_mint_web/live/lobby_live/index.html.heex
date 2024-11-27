@@ -23,6 +23,11 @@
           id: "connect-four",
           session: %{"lobby_id" => @lobby.id, "user_id" => @user_id}
         ) %>
+      <% :yahtzee -> %>
+        <%= live_render(@socket, BlueMintWeb.Live.Yahtzee.Index,
+          id: "yahtzee",
+          session: %{"lobby_id" => @lobby.id, "user_id" => @user_id}
+        ) %>
       <% _ -> %>
         <span>Game type not found</span>
     <% end %>

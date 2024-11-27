@@ -1,6 +1,7 @@
 defmodule BlueMint.Yahtzee.GameStateTest do
   use ExUnit.Case, async: true
   alias BlueMint.Yahtzee.GameState
+  alias BlueMint.Yahtzee.Scorecard
 
   setup do
     initial_state = %GameState{
@@ -29,9 +30,11 @@ defmodule BlueMint.Yahtzee.GameStateTest do
   end
 
   test "add_user/2 does not add a user if game is full", %{initial_state: state} do
-    state = %{state | users: ["user1", "user2"]}
-    {:full, state} = GameState.add_user(state, "user3")
-    assert state.users == ["user1", "user2"]
+    state = %{state | users: Enum.map(1..10, fn x -> "user#{x}" end)}
+
+    {:full, state} = GameState.add_user(state, "user11")
+
+    assert state.users == Enum.map(1..10, fn x -> "user#{x}" end)
   end
 
   test "remove_user/2 removes a user from the game", %{initial_state: state} do
@@ -67,6 +70,18 @@ defmodule BlueMint.Yahtzee.GameStateTest do
     assert new_state.rolls == 1
   end
 
+  test "roll/2 no more rolls for the current user hand", %{initial_state: state} do
+    {:ok, state} = GameState.add_user(state, "user1")
+    {:ok, state} = GameState.add_user(state, "user2")
+    {{:ok, _user_turn}, state} = GameState.start_game(state)
+    {:ok, state} = GameState.roll(state, state.user_turn)
+    {:ok, state} = GameState.roll(state, state.user_turn)
+    {:ok, state} = GameState.roll(state, state.user_turn)
+    {:no_more_rolls, new_state} = GameState.roll(state, state.user_turn)
+    assert new_state.dice == state.dice
+    assert new_state.rolls == 3
+  end
+
   test "score/3 scores the current user's roll", %{initial_state: state} do
     {:ok, state} = GameState.add_user(state, "user1")
     {:ok, state} = GameState.add_user(state, "user2")
@@ -74,5 +89,53 @@ defmodule BlueMint.Yahtzee.GameStateTest do
     {:ok, state} = GameState.roll(state, state.user_turn)
     {:ok, new_state} = GameState.score(state, state.user_turn, :ones)
     assert length(new_state.scorecards) == 1
+    assert new_state.user_turn != state.user_turn
+  end
+
+  test "score/3 is able to get next user by rolling over user list", %{initial_state: state} do
+    {:ok, state} = GameState.add_user(state, "user1")
+    {:ok, state} = GameState.add_user(state, "user2")
+    {:ok, state} = GameState.add_user(state, "user3")
+    {{:ok, _user_turn}, state} = GameState.start_game(state)
+    state = Map.put(state, :user_turn, "user3")
+    {:ok, state} = GameState.roll(state, state.user_turn)
+    {:ok, new_state} = GameState.score(state, state.user_turn, :ones)
+    assert length(new_state.scorecards) == 1
+    assert new_state.user_turn == "user1"
+  end
+
+  test "score/3 returns :all_scorecards_complete when all scorecards are complete", %{
+    initial_state: state
+  } do
+    {:ok, state} = GameState.add_user(state, "user1")
+    {:ok, state} = GameState.add_user(state, "user2")
+    {{:ok, _user_turn}, state} = GameState.start_game(state)
+
+    complete_scorecard = %Scorecard{
+      ones: 3,
+      twos: 6,
+      threes: 9,
+      fours: 12,
+      fives: 15,
+      sixes: 18,
+      three_of_kind: 25,
+      four_of_kind: 30,
+      full_house: 40,
+      small_straight: 30,
+      large_straight: 40,
+      yahtzee: 50,
+      chance: 20
+    }
+
+    state =
+      Map.put(state, :scorecards, [
+        complete_scorecard |> Map.put(:user_id, "user1") |> Map.put(:ones, nil),
+        Map.put(complete_scorecard, :user_id, "user2")
+      ])
+      |> Map.put(:user_turn, "user1")
+
+    {:ok, state} = GameState.roll(state, state.user_turn)
+    {result, _state} = GameState.score(state, state.user_turn, :ones)
+    assert result == :all_scorecards_complete
   end
 end

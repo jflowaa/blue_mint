@@ -8,7 +8,7 @@ defmodule BlueMint.Common.ProcessMonitorTest do
 
   setup do
     case ProcessMonitor.start_link([]) do
-      {:ok, pid} -> :ok
+      {:ok, _pid} -> :ok
       :ignore -> :ok
     end
   end

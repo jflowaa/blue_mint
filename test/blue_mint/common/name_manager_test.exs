@@ -5,7 +5,7 @@ defmodule BlueMint.Common.NameManagerTest do
 
   setup do
     case NameManager.start_link([]) do
-      {:ok, pid} -> :ok
+      {:ok, _pid} -> :ok
       :ignore -> :ok
     end
   end

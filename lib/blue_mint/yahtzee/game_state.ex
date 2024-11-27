@@ -16,7 +16,7 @@ defmodule BlueMint.Yahtzee.GameState do
   end
 
   def add_user(state, user_id) do
-    case Enum.count(state.users) < 2 do
+    case Enum.count(state.users) < 10 do
       true ->
         case Enum.any?(state.users, fn x -> x == user_id end) do
           true ->
@@ -131,19 +131,40 @@ defmodule BlueMint.Yahtzee.GameState do
             end
           end)
 
-        new_state =
-          state
-          |> Map.put(:scorecards, updated_scorecards)
-          |> Map.put(
-            :user_turn,
-            Enum.at(
-              state.users,
-              Enum.find_index(state.users, fn x -> x == user_id end) + 1,
-              hd(state.users)
-            )
-          )
+        if Enum.all?(updated_scorecards, fn x -> Scorecard.is_complete?(x) end) do
+          winning_scorecard =
+            Enum.max_by(updated_scorecards, fn x -> x.grand_total end)
 
-        {:ok, new_state}
+          {:all_scorecards_complete,
+           state
+           |> Map.put(:scorecards, updated_scorecards)
+           |> Map.put(:user_turn, winning_scorecard.user_id)}
+        else
+          current_user_index = Enum.find_index(state.users, fn x -> x == user_id end)
+
+          {:ok,
+           state
+           |> Map.put(:scorecards, updated_scorecards)
+           |> Map.put(
+             :user_turn,
+             next_user_turn(state.users, updated_scorecards, current_user_index)
+           )}
+        end
     end
+  end
+
+  defp next_user_turn(users, scorecards, current_user_index) do
+    users
+    |> Stream.cycle()
+    |> Stream.drop(current_user_index + 1)
+    |> Enum.find(fn user ->
+      scorecard = Enum.find(scorecards, fn x -> x.user_id == user end)
+
+      if scorecard do
+        not Scorecard.is_complete?(scorecard)
+      else
+        true
+      end
+    end)
   end
 end

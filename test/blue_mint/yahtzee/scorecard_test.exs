@@ -113,4 +113,44 @@ defmodule BlueMint.Yahtzee.ScorecardTests do
     assert updated_scorecard.lower_section == 202
     assert updated_scorecard.grand_total == 202
   end
+
+  test "is_complete? returns true for a complete scorecard" do
+    complete_scorecard = %Scorecard{
+      ones: 3,
+      twos: 6,
+      threes: 9,
+      fours: 12,
+      fives: 15,
+      sixes: 18,
+      three_of_kind: 25,
+      four_of_kind: 30,
+      full_house: 40,
+      small_straight: 30,
+      large_straight: 40,
+      yahtzee: 50,
+      chance: 20
+    }
+
+    assert Scorecard.is_complete?(complete_scorecard)
+  end
+
+  test "is_complete? returns false for an incomplete scorecard" do
+    incomplete_scorecard = %Scorecard{
+      ones: 3,
+      twos: 6,
+      threes: 9,
+      fours: 12,
+      fives: 15,
+      sixes: 18,
+      three_of_kind: 25,
+      four_of_kind: 30,
+      full_house: 40,
+      small_straight: 30,
+      large_straight: 40,
+      yahtzee: 50
+      # chance is missing
+    }
+
+    refute Scorecard.is_complete?(incomplete_scorecard)
+  end
 end

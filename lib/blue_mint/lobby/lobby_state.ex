@@ -3,7 +3,7 @@ defmodule BlueMint.Lobby.LobbyState do
   import Ecto.Changeset
 
   @primary_key {:id, :string, autogenerate: false}
-  @game_types [:tic_tac_toe, :connect_four]
+  @game_types [:tic_tac_toe, :connect_four, :yahtzee]
 
   schema "lobby_state" do
     field(:name, :string)

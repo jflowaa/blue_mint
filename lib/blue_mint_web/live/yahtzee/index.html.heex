@@ -1,0 +1,27 @@
+<div>
+  <div>
+    <BlueMintWeb.Components.GameStateViewerComponent.render game_state={@game_state} />
+  </div>
+  <%= if @game_state.joinable? and Enum.all?(@game_state.users, fn x -> x != @user_id end) do %>
+    <.button phx-click="join">
+      Join Game
+    </.button>
+  <% end %>
+  <%= if Enum.any?(@game_state.users, fn x -> x == @user_id end) do %>
+    <%= if not @game_state.started? do %>
+      <.button phx-click="start_game">
+        <%= if Enum.any?(@game_state.board, fn x -> x != "" end) do %>
+          Start New Game
+        <% else %>
+          Start Game
+        <% end %>
+      </.button>
+    <% end %>
+    <.button phx-click="leave">
+      Leave Game
+    </.button>
+  <% end %>
+  <div>
+    yahtzee game board
+  </div>
+</div>
