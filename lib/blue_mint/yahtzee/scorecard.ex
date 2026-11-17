@@ -40,6 +40,10 @@ defmodule BlueMint.Yahtzee.Scorecard do
     field(:grand_total, :integer, default: 0)
   end
 
+  def upper_section_keys(), do: @upper_section
+
+  def lower_section_keys(), do: @lower_section
+
   def score_scorecard_roll(scorecard, category, roll) do
     cond do
       Map.get(scorecard, category, nil) != nil ->

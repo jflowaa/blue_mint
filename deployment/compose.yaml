@@ -1,0 +1,19 @@
+name: blue-mint
+
+services:
+  blue-mint:
+    image: blue_mint:${IMAGE_TAG}
+    container_name: blue-mint
+    restart: unless-stopped
+    env_file: [./env/app.env]
+    networks: [edge]
+    mem_limit: 512m
+    security_opt: [no-new-privileges:true]
+    logging:
+      driver: k8s-file
+      options:
+        max-size: "15m"
+
+networks:
+  edge:
+    external: true
