@@ -42,8 +42,6 @@ npm-debug.log
 .DS_Store
 .elixir_ls/
 
-# Per-overlay Kustomize secret values
-
 # Compose deployment values
 deployment/.env
 deployment/env/*.env
